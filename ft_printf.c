@@ -6,7 +6,7 @@
 /*   By: acourtar <acourtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/01 09:34:26 by acourtar          #+#    #+#             */
-/*   Updated: 2022/11/16 12:51:43 by acourtar         ###   ########.fr       */
+/*   Updated: 2022/11/16 18:39:10 by acourtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,11 +30,11 @@ int	ft_printf(const char *str, ...)
 
 	len = 0;
 	va_start(args, str);
-	while (*str != '\0')
+	while (str[0] != '\0')
 	{
-		if (*str == '%' && *(str + 1) != '\0')
+		if (str[0] == '%' && str[1] != '\0')
 		{
-			if (*(str + 1) == '%')
+			if (str[1] == '%')
 				ft_putchar_fd('%', 1);
 			else
 				len += select_conversion(args, str[1]) - 1;
