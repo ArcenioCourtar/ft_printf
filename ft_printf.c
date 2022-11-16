@@ -6,7 +6,7 @@
 /*   By: acourtar <acourtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/01 09:34:26 by acourtar          #+#    #+#             */
-/*   Updated: 2022/11/15 14:02:30 by acourtar         ###   ########.fr       */
+/*   Updated: 2022/11/16 12:51:43 by acourtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,11 @@
 #include <stddef.h>
 #include <stdarg.h>
 #include <unistd.h>
+#include <stdint.h>
 
-static void	ft_putnbru_fd(unsigned int n, int fd);
 static int	select_conversion(va_list args, char c);
 static int	numlen_calc(long i);
-static int	hex_conversion(size_t i, char c, int called);
+static int	num_conversion(uintptr_t i, char c, int base, int called);
 
 // Mirror functionality from printf.
 // Minus the hard stuff. xd
@@ -69,11 +69,11 @@ static int	select_conversion(va_list args, char c)
 	else if (c == 'i' || c == 'd')
 		return (numlen_calc(va_arg(args, int)));
 	else if (c == 'u')
-		return (numlen_calc(va_arg(args, unsigned int)));
+		return (num_conversion(va_arg(args, unsigned int), c, 10, 0));
 	else if (c == 'x' || c == 'X')
-		return (hex_conversion(va_arg(args, unsigned int), c, 0));
+		return (num_conversion(va_arg(args, unsigned int), c, 16, 0));
 	else if (c == 'p')
-		return (hex_conversion(va_arg(args, size_t), c, 0));
+		return (num_conversion(va_arg(args, uintptr_t), c, 16, 0));
 	else if (c == 'c')
 		ft_putchar_fd(va_arg(args, int), 1);
 	return (1);
@@ -85,10 +85,7 @@ static int	numlen_calc(long i)
 {
 	int	numlen;
 
-	if (i < 0)
-		ft_putnbr_fd(i, 1);
-	else
-		ft_putnbru_fd((unsigned int) i, 1);
+	ft_putnbr_fd(i, 1);
 	if (i == 0)
 		return (1);
 	if (i < 0)
@@ -106,24 +103,9 @@ static int	numlen_calc(long i)
 	return (numlen);
 }
 
-// Literally putnbr from libft but for unsigned ints
-void	ft_putnbru_fd(unsigned int n, int fd)
-{
-	char	result;
-
-	result = '0';
-	if (n > 9)
-	{
-		ft_putnbr_fd((n / 10), fd);
-	}
-	result += n % 10;
-	write(fd, &result, 1);
-}
-
-// Converts the number 'i' into it's hex equivalent.
-// Since pointers also use hex notation I handle %x, %X and %p,
-// with this one function. 
-static int	hex_conversion(size_t i, char c, int called)
+// Converts the number 'i' into it's 'base' equivalent.
+// Handles all unsigned numbers, including pointers.
+static int	num_conversion(uintptr_t i, char c, int base, int called)
 {
 	char	*hex_chars;
 	int		len;
@@ -145,9 +127,9 @@ static int	hex_conversion(size_t i, char c, int called)
 		hex_chars = "0123456789abcdef";
 	if (i != 0)
 	{
-		len += hex_conversion((i / 16), c, 1);
+		len += num_conversion((i / base), c, base, 1);
 		len++;
-		ft_putchar_fd(hex_chars[i % 16], 1);
+		ft_putchar_fd(hex_chars[i % base], 1);
 	}
 	return (len);
 }
